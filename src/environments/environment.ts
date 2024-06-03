@@ -1,9 +1,9 @@
 export const environment = {
     production: true,
     type: 'tomcat',
-    url: 'http://acesso.newtechs.com.br:3392',
+    url: 'http://172.20.32.69:8080',
     api: '/api/esp/v1',
-    auth: 'super:super',
+    auth: 'denilsonf.ne:protege',
     token: '',
 
 };

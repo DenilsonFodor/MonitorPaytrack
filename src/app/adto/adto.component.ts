@@ -12,10 +12,8 @@ import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-adto',
-  standalone: true,
   templateUrl: './adto.component.html',
   styleUrl: './adto.component.css',
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 
 export class AdtoComponent implements OnInit {

@@ -22,9 +22,12 @@
     "@po-ui/ng-components": "^17.7.0",
     "@po-ui/ng-templates": "^17.11.0",
     "@totvs/po-theme": "^17.11.0",
+    "classlist.js": "^1.1.20150312",
+    "core-js": "^3.37.1",
     "ngx-cookie-service": "^17.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "web-animations-js": "^2.3.2",
     "zone.js": "~0.14.3"
   },
   "devDependencies": {

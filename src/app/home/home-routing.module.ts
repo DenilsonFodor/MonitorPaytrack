@@ -5,7 +5,7 @@ import { AdtoModule } from '../adto/adto.module';
 import { PrestModule } from '../prest/prest.module';
 
 const routes: Routes = [
-  { path: '' , pathMatch: 'full' , redirectTo:'adto'},
+  { path: '' , pathMatch: 'full' , redirectTo:'home'},
 
   {   
     path: '', component: HomeComponent, children: [
