@@ -5,6 +5,7 @@ import { SharedModule } from '../shared/shared.module';
 import { FormsModule } from '@angular/forms';
 import { PrestService } from '../shared/services/prest.service';
 import { RateioComponent } from './rateio/rateio.component';
+import { procPrestService } from '../shared/services/proc-prest.service';
 
 
 @NgModule({
@@ -15,6 +16,6 @@ import { RateioComponent } from './rateio/rateio.component';
     SharedModule,
     FormsModule    
   ],
-  providers: [PrestService]
+  providers: [PrestService, procPrestService]
 })
 export class PrestModule { }

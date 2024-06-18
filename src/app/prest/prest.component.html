@@ -1,96 +1,105 @@
-<po-page-list p-title="Prestação de Contas">
+<po-page-list 
+    p-title = 'Prestação de Contas'>
+
+   <div class="sample-container">
+    
+        <po-loading-overlay 
+            [hidden]="escondeTimer"
+        ></po-loading-overlay>
+    
+        </div>
 
    <div class="po-wrapper"></div>
 
-   <po-button 
-      p-danger="p-danger" 
-      p-label="FILTRO" 
-      p-icon="po-icon po-icon-filter"
-      (p-click)="abrirModal()"
-   ></po-button>
+   <po-widget>
+        <div class="po-row">
+            
+            <po-datepicker
+              class="po-md-2"
+              p-label="Periodo Inicial"
+              p-format="dd/mm/yyyy"
+              [(ngModel)]="filterData.dataEmissaoIni"
+              ></po-datepicker>
+            
+            <po-datepicker
+              class="po-md-2"
+              p-label="Periodo Final"
+              p-format="dd/mm/yyyy"
+              [(ngModel)]="filterData.dataEmissaoDim"
+            ></po-datepicker>
 
-   <po-table #tableMonitoramento
-      [p-columns]="colunas" 
-      [p-items]="itens"
-      [p-actions]="acoes"
-      p-infinity-scroll="true"
-      [p-infinite-scroll-distance]=90
-      p-container="shadow"
-      [p-height]="415"
-      [p-hide-detail]="false"
-      p-striped="true"
-   > 
+            <po-input
+                class="po-md-2"
+                p-label="Documento"
+                name="documentoIni"
+                [(ngModel)]="filterData.codigoDocumentoIni"
+            ></po-input>
+
+            <po-input
+                class="po-md-2"
+                p-label="CPF/CNPJ"
+                name="cpfCnpjIni"
+                [(ngModel)]="filterData.cpfCnpjIni"
+            ></po-input>
+
+            <po-button #btAtualiza
+                class ="po-mt-4 po-ml-3"
+                p-kind="primary"
+                p-label="Atualiza"
+                p-icon="po-icon-refresh"
+                (p-click)="onListaDados()"
+            ></po-button>
+
+            <po-button #btProcessa
+               class ="po-mt-4 po-ml-3"
+               p-kind="primary"
+               p-label="Integra"
+               p-icon="po-icon-upload"
+               (p-click)="procPrest"
+            ></po-button>
+
+         </div>
+    
+   </po-widget>
+
+   <po-table 
+        [p-columns]="colunas" 
+        [p-items]="itens"
+        [p-actions]="maisOpcoes"
+        [p-selectable]="true"
+        [p-auto-collapse]="true"
+        [p-hide-columns-manager]="false"
+        [p-hide-table-search]="false"
+        [p-hide-detail]="false"
+        [p-infinite-scroll]="true"
+        [p-infinite-scroll-distance]=90
+        p-container="shadow"
+        [p-sort]="true"
+        [p-height]="415"
+        p-striped="true"
+        (p-expanded)="BuscaErros($event)"
+        >
+    
+      <ng-template #expandedTemplate let-item
+         p-table-row-template
+         let-rowErro
+         let-i="rowSelect"
+         [p-table-row-template-show]="habilitaErro">
+
+         <po-table class="po-md-8"
+            [p-columns]="colunasErro"
+            [p-items]="itensErro"
+            [p-hide-columns-manager]="true"
+            p-container="true"
+            [p-infinite-scroll]="true" 
+            [p-height]="200"  
+         ></po-table>
+
+      </ng-template>
+
    </po-table>
-
-   <po-modal #poModal
-      p-title="Filtros"
-      [p-primary-action]="confirm"
-      [p-secondary-action]="close"
-      >
-      <div class="po-row">
-         <po-datepicker
-            class="po-md-5"
-            p-label="Emissão Inicial"
-            name='emissaoIni'
-            p-format="dd/mm/yyyy"
-            [(ngModel)]="filterData.dataEmissaoIni"
-            [ngModelOptions]="{standalone: true}"
-         >
-         </po-datepicker>
-         
-         <po-datepicker
-            class="po-md-5"
-            p-label="Emissão Final"
-            name="emissaoFim"
-            p-format="dd/mm/yyyy"
-            [(ngModel)]="filterData.dataEmissaoDim"
-            [ngModelOptions]="{standalone: true}"
-         >
-         </po-datepicker>
-      </div>
-
-      <div class="po-row">
-         <po-input
-            class="po-md-6"
-            p-label="Documento Inicial"
-            name="documentoIni"
-            [(ngModel)]="filterData.codigoDocumentoIni"
-            [ngModelOptions]="{standalone: true}"
-         >
-         </po-input>
-         
-         <po-input
-            class="po-md-6"
-            p-label="Documento Final"
-            name="documentoFim"
-            [(ngModel)]="filterData.codigoDocumentoFim"
-            [ngModelOptions]="{standalone: true}"
-         >
-         </po-input>
-      </div>
-
-      <div>
-         <po-input
-            class="po-md-5"
-            p-label="CPF/CNPJ Inicial"
-            name="cpfCnpjIni"
-            [(ngModel)]="filterData.cpfCnpjIni"
-            [ngModelOptions]="{standalone: true}"
-         >
-         </po-input>
-         <po-input
-            class="po-md-5"
-            p-label="CPF/CNPJ Final"
-            name="cpfCnpjFim"
-            [(ngModel)]="filterData.cpfCnpjFim"
-            [ngModelOptions]="{standalone: true}"
-         >
-         </po-input>
-      </div>   
-
-   </po-modal>
-
-</po-page-list>
  
+</po-page-list>
+
 
 

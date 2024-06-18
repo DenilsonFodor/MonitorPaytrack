@@ -1,13 +1,13 @@
-import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { PoModalAction, PoModalComponent, PoTableAction, PoTableColumn } from '@po-ui/ng-components';
+import { PoTableAction, PoTableColumn, PoTableComponent } from '@po-ui/ng-components';
 import { Observable} from 'rxjs';
-import { filter, pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs/operators';
 
-import { SharedModule } from '../shared/shared.module';
-import { FormsModule } from '@angular/forms';
 import { adtoService } from '../shared/services/adto.service';
 import { HttpClient } from '@angular/common/http';
+import { procAdtoService } from '../shared/services/proc-adto.service';
+import { SessionStorageService } from '../shared/services/storage.service';
 
 
 @Component({
@@ -17,8 +17,8 @@ import { HttpClient } from '@angular/common/http';
 })
 
 export class AdtoComponent implements OnInit {
-  @ViewChild(PoModalComponent, { static: true}) poModal!: PoModalComponent;
-
+  
+  
   filterData: any = {
     dataEmissaoIni: new Date(),
     dataEmissaoDim: new Date(),
@@ -27,13 +27,21 @@ export class AdtoComponent implements OnInit {
     cpfCnpjIni: '',
     cpfCnpjFim: 'ZZZZZZZZZZZZ',
     page: 1,
-    pageSize: 30,
-    tipoDocumento: 'Adiantamento',
+    pageSize: 100,
+    tipoDocumento: 'AN',
   };
 
 
   colunas: Array<PoTableColumn> = 
-  [ {property: 'codigo_documento',    label: 'CODIGO',      type: 'string', width: '10%'},
+  [ {property: 'situacao',  label: 'SITUAÇÃO', type: 'string', width: '10%',
+      labels: [
+        { label: 'Pendente',   value: 'Pendente',   color: 'color-08' },
+        { label: 'Erro',       value: 'Erro',       color: 'color-07' },
+        { label: 'Processado', value: 'Processado', color: 'color-11' },
+        { label: 'Concluido',  value: 'Concluido',  color: 'color-11' },
+      ]},
+    {property: 'cod_estab',           label: 'ESTABELEC.',  type: 'string', width: '5%'},
+    {property: 'codigo_documento',    label: 'CODIGO',      type: 'string', width: '10%'},
     {property: 'tipo',                label: 'TIPO',        type: 'string', width: '10%'},
     {property: 'cpf_cnpj',            label: 'CPF/CNPJ',    type: 'string'},
     {property: 'data_emissao',        label: 'EMISSÃO',     type: 'date'  , width: '12%'},
@@ -47,35 +55,35 @@ export class AdtoComponent implements OnInit {
     {property: 'banco_transf',        label: 'BANCO',       type: 'string'},
     {property: 'agencia_transf',      label: 'AGENCIA',     type: 'string'},
     {property: 'cta_corrente_transf', label: 'C.CORRENTE',  type: 'string'},
-    {property: 'Unid_negocio',        label: 'UNID.NEGOCIO',type: 'string'},
+    {property: 'unidade_negocio',     label: 'UNID.NEGOCIO',type: 'string'},
   ];
 
+  colunasErro: Array<PoTableColumn> = [
+    { property: 'referencia',          label: 'REFERENCIA',  type: 'string', width: '12%'},
+    { property: 'cod_estab',           label: 'ESTABELEC',   type: 'string', width: '10%'},
+    { property: 'codigo_documento',    label: 'CODIGO',      type: 'string', width: '12%'},
+    { property: 'tipo',                label: 'TIPO',        type: 'string', width: '5%'},
+    { property: 'cpf_cnpj',            label: 'CPF/CNPJ',    type: 'string', width: '12%'},
+    { property: 'ErrorNumber',         label: 'NUM.ERRO',    type: 'string', width: '10%'},
+    { property: 'ErrorDescription',    label: 'DESC.ERRO',   type: 'string', width: '30%'},
+  ]
+
  
-  close: PoModalAction = {
-    label: 'Cancela', action: () => {this.closeModal(); }
-  };
-  
-  confirm: PoModalAction = {
-     //label: 'Confirma', action: this.retornaDadosAdto.bind(this),
-     label: 'Confirma', action: () => {this.onListaDados(); }
-  };
-  
   itens: any = []  //tableData
+  itensErro: any
+  escondeTimer = true;
 
   obs$!: Observable<boolean>;
   hasMore$!: Observable<boolean>;
   
-  constructor(private service: adtoService, 
-              private router: Router,
-              private http: HttpClient) {}
+  constructor(private service: adtoService,
+              private adtoServ: procAdtoService,
+              private storageService: SessionStorageService, 
+              private router: Router) {}
  
 
   ngOnInit(): void {
     this.retornaDadosAdto();
-  }
-
-  closeModal() {
-    this.poModal.close()
   }
 
   onListaDados() {
@@ -84,26 +92,50 @@ export class AdtoComponent implements OnInit {
   };
   
   retornaDadosAdto() {
+    this.escondeTimer = false
     let obs$ = this.service.getAll(this.filterData);
     this.service.getAll(this.filterData).subscribe({
       next:result => {
+        this.escondeTimer = true
         this.itens = result.items
       },
       error:erro => {
+        this.escondeTimer = true
         console.log(erro)
       },
-      complete:() => {
-        this.closeModal();
-      }
+ 
     })
-
     this.hasMore$ = obs$.pipe(pluck('hasNext'));
-
   }
 
-  abrirModal() {
-    this.poModal.open()
+  BuscaErros(args: any) {
+    this.escondeTimer = false
+    sessionStorage.setItem('rowidAdto', args.rowid) 
+    this.adtoServ.getErros(args.rowid).subscribe({
+      next:result => {
+        this.escondeTimer = true
+        this.itensErro = result.items
+        this.storageService.setDados('ErrosPrest', this.itensErro)
+      },
+      error:erro => {
+        this.escondeTimer = true
+        console.log(erro)
+      },
+    }) 
   }
+
+  procAdto(args: any) {
+  }
+
+  validaSituacao() {
+     return true
+  }
+
+  habilitaErro(row:any, index: number) {
+    return row.situacao == 'Erro';
+  }
+
+
 }
 
 

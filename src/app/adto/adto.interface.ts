@@ -13,7 +13,10 @@ export interface Adiantamento
     banco_transf: string;
     agencia_transf: string;
 	cta_corrente_transf: string;
+    unidade_negocio: string;
+    cod_estab: string;
     observacao: string;
+    situacao: string;
 }
 
 export interface adtoAPI { //RootObject

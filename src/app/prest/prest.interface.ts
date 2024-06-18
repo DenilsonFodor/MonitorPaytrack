@@ -1,4 +1,6 @@
 export interface Prestacao {
+    situacao: string;
+    cod_estab: string; 
     codigo_documento: string;
 	tipo: string;
     cpf_cnpj: string;                       
@@ -12,7 +14,6 @@ export interface Prestacao {
     rateio_centro_custo: string;
     rateio_cc: string;
     unid_negocio: string;
-	
 }
 
 export interface prestAPI { //RootObject
