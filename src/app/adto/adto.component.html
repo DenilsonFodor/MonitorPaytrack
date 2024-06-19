@@ -54,9 +54,9 @@
             <po-button #btProcessa
                 class ="po-mt-4 po-ml-3"
                 p-kind="primary"
-                p-label="Integra"
+                p-label="Reporcessar"
                 p-icon="po-icon-upload"
-                (p-click)="procAdto"
+                (p-click)="processaAdto()"
          ></po-button>
 
 
@@ -67,6 +67,8 @@
     <po-table 
         [p-columns]="colunas" 
         [p-items]="itens"
+        (p-selected)="selecaoReprocesso($event, 'new')"
+        (p-unselected)="selecaoReprocesso($event, 'change')"
         [p-selectable]="true"
         [p-auto-collapse]="true"
         [p-hide-columns-manager]="false"
@@ -77,8 +79,9 @@
         p-container="shadow"
         [p-sort]="true"
         [p-height]="415"
-        [p-hide-detail]="false"
-        p-striped="true">
+        p-striped="true"
+        (p-expanded)="BuscaErros($event)"
+        >
     
         <ng-template #expandedTemplate let-item
             p-table-row-template
@@ -92,7 +95,7 @@
                [p-hide-columns-manager]="true"
                p-container="true"
                [p-infinite-scroll]="true" 
-               [p-height]="200"  
+               [p-height]="250"  
             ></po-table>
 
         </ng-template>

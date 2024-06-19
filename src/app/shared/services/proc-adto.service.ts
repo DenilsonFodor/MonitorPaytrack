@@ -15,6 +15,10 @@ export class procAdtoService {
 
   constructor(private httpClient: HttpClient) {}
 
+  public getProc(rowid: string): Observable<any> {
+    return this.httpClient.get<any>(endpoint + '/' + rowid,{headers:header});
+  }
+
   public getErros(rowid: string): Observable<any> {
     return this.httpClient.get<any>(endpoint + '/erros/' + rowid,{headers:header});
 }

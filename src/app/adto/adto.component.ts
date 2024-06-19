@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { PoTableAction, PoTableColumn, PoTableComponent } from '@po-ui/ng-components';
+import { PoDialogService, PoNotificationService, PoTableAction, PoTableColumn, PoTableComponent } from '@po-ui/ng-components';
 import { Observable} from 'rxjs';
 import { pluck } from 'rxjs/operators';
 
@@ -59,13 +59,10 @@ export class AdtoComponent implements OnInit {
   ];
 
   colunasErro: Array<PoTableColumn> = [
-    { property: 'referencia',          label: 'REFERENCIA',  type: 'string', width: '12%'},
-    { property: 'cod_estab',           label: 'ESTABELEC',   type: 'string', width: '10%'},
-    { property: 'codigo_documento',    label: 'CODIGO',      type: 'string', width: '12%'},
-    { property: 'tipo',                label: 'TIPO',        type: 'string', width: '5%'},
-    { property: 'cpf_cnpj',            label: 'CPF/CNPJ',    type: 'string', width: '12%'},
-    { property: 'ErrorNumber',         label: 'NUM.ERRO',    type: 'string', width: '10%'},
-    { property: 'ErrorDescription',    label: 'DESC.ERRO',   type: 'string', width: '30%'},
+    { property: 'ErrorSequence',    label: 'SEQ.',           type: 'string', width: '5%'},
+    { property: 'ErrorNumber',      label: 'NUM.ERRO',       type: 'string', width: '5%'},
+    { property: 'ErrorType',        label: 'TIPO',           type: 'string', width: '7%'},
+    { property: 'ErrorDescription', label: 'DESCRICAO ERRO', type: 'string', width: '50%'},
   ]
 
  
@@ -73,12 +70,18 @@ export class AdtoComponent implements OnInit {
   itensErro: any
   escondeTimer = true;
 
+  retornoProc: any
+  selecao: Array<any> = []
+  itensSelecionados: Array<any> = [] 
+
   obs$!: Observable<boolean>;
   hasMore$!: Observable<boolean>;
   
   constructor(private service: adtoService,
               private adtoServ: procAdtoService,
               private storageService: SessionStorageService, 
+              private poDialog: PoDialogService,
+              private poNotification: PoNotificationService,
               private router: Router) {}
  
 
@@ -114,8 +117,8 @@ export class AdtoComponent implements OnInit {
     this.adtoServ.getErros(args.rowid).subscribe({
       next:result => {
         this.escondeTimer = true
-        this.itensErro = result.items
-        this.storageService.setDados('ErrosPrest', this.itensErro)
+        this.itensErro = result.Erros
+        this.storageService.setDados('ErrosAdto', this.itensErro)
       },
       error:erro => {
         this.escondeTimer = true
@@ -123,6 +126,64 @@ export class AdtoComponent implements OnInit {
       },
     }) 
   }
+
+  selecaoReprocesso(event:any, type:any): void {
+    if (type == 'new') {
+      if (event.situacao =='Erro') {
+        this.itensSelecionados = [
+          ...this.itensSelecionados,
+          {rowid:event.rowid},
+        ]
+      }
+      else {
+        this.poNotification.error('Situação invalida !!!')
+      }  
+    } 
+    else {
+      if (this.itensSelecionados.length > 0) {
+        this.itensSelecionados = this.itensSelecionados.filter(
+          itensSelecionados => itensSelecionados.rowid != event.rowid)
+      }
+    }
+  }
+
+  processaAdto(): void {
+    this.poDialog.confirm({
+      title: 'Reprocessamento',
+      message: `Voce tem ${this.itensSelecionados.length} registros para reprocessamento, deseja continuar?`,
+      confirm: () => this.reprocessa(this.itensSelecionados),
+      cancel: () => {}
+    });
+  }
+
+  reprocessa(regSelec: Array<any>) {
+    regSelec.forEach(item => {
+      this.escondeTimer = false
+      sessionStorage.setItem('rowidAdto', item.rowid) 
+      this.adtoServ.getProc(item.rowid).subscribe({
+        next:result => {
+          this.escondeTimer = true
+          this.retornoProc = result.sucesso
+          console.log(result.sucesso)
+          //this.storageService.setDados('Reprocesso', this.retornoProc)
+          if (this.retornoProc = 'no') {
+            this.poNotification.error(`${item.rowid} erro no processamento`)
+          }
+          else {
+            this.poNotification.success(`${item.rowid} processado com sucesso`)
+          }  
+        },
+        error:erro => {
+          this.escondeTimer = true
+          this.poNotification.error(`${item.rowid} erro no processamento`)
+        },
+      }) 
+        
+      
+    })
+  }
+
+
 
   procAdto(args: any) {
   }
